@@ -45,67 +45,149 @@ if ($flashError) { unset($_SESSION['form_error']); }
 </div>
 
 <div class="card mt-3">
-  <div class="card-header">
-    <h3 class="card-title mb-0">Contacts</h3>
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h3 class="card-title mb-0">Client Contacts</h3>
+    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addContactModal">Add Contact</button>
   </div>
-  <div class="card-body">
+  <div class="card-body p-0">
     <?php if (empty($contacts)): ?>
-    <p class="text-muted mb-0">No contacts yet. Add one below.</p>
+    <p class="text-muted mb-0 p-3">No contacts yet. Click &quot;Add Contact&quot; to add one.</p>
     <?php else: ?>
-    <ul class="list-group list-group-flush">
-      <?php foreach ($contacts as $c): ?>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-          <?= htmlspecialchars($c['contact_name'] ?? '') ?>
-          <?php if (!empty($c['is_primary'])): ?>
-          <span class="badge bg-primary ms-1">Primary</span>
-          <?php endif; ?>
-          <?php if (($c['designation'] ?? '') !== ''): ?>
-          <span class="text-muted small">— <?= htmlspecialchars($c['designation']) ?></span>
-          <?php endif; ?>
-          <?php if (($c['contact_email'] ?? '') !== ''): ?>
-          <span class="text-muted small d-block"><?= htmlspecialchars($c['contact_email']) ?></span>
-          <?php endif; ?>
-          <?php if (($c['contact_phone'] ?? '') !== ''): ?>
-          <span class="text-muted small d-block"><?= htmlspecialchars($c['contact_phone']) ?></span>
-          <?php endif; ?>
-        </div>
-        <?php if (empty($c['is_primary'])): ?>
-        <a href="<?= base_url('?page=clients/contact_primary&client_id=' . urlencode($id) . '&id=' . urlencode($c['id'] ?? '')) ?>" class="btn btn-sm btn-outline-primary">Set as primary</a>
-        <?php endif; ?>
-      </li>
-      <?php endforeach; ?>
-    </ul>
+    <div class="table-responsive-crm">
+      <table class="table table-hover table-bordered mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Designation</th>
+            <th>Primary</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($contacts as $c): ?>
+          <tr>
+            <td><?= htmlspecialchars($c['contact_name'] ?? '') ?></td>
+            <td><?= ($c['contact_email'] ?? '') !== '' ? htmlspecialchars($c['contact_email']) : '—' ?></td>
+            <td><?= ($c['contact_phone'] ?? '') !== '' ? htmlspecialchars($c['contact_phone']) : '—' ?></td>
+            <td><?= ($c['designation'] ?? '') !== '' ? htmlspecialchars($c['designation']) : '—' ?></td>
+            <td><?php if (!empty($c['is_primary'])): ?><span class="badge bg-primary">Primary</span><?php else: ?>—<?php endif; ?></td>
+            <td>
+              <button type="button" class="btn btn-sm btn-outline-secondary edit-contact" data-id="<?= htmlspecialchars($c['id'] ?? '', ENT_QUOTES) ?>" data-name="<?= htmlspecialchars($c['contact_name'] ?? '', ENT_QUOTES) ?>" data-email="<?= htmlspecialchars($c['contact_email'] ?? '', ENT_QUOTES) ?>" data-phone="<?= htmlspecialchars($c['contact_phone'] ?? '', ENT_QUOTES) ?>" data-designation="<?= htmlspecialchars($c['designation'] ?? '', ENT_QUOTES) ?>" data-primary="<?= !empty($c['is_primary']) ? '1' : '0' ?>">Edit</button>
+              <?php if (empty($c['is_primary'])): ?>
+              <a href="<?= base_url('?page=client_contacts/primary&client_id=' . urlencode($id) . '&id=' . urlencode($c['id'] ?? '')) ?>" class="btn btn-sm btn-outline-primary">Set primary</a>
+              <?php endif; ?>
+              <a href="<?= base_url('?page=client_contacts/delete&id=' . urlencode($c['id'] ?? '')) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this contact?');">Delete</a>
+            </td>
+          </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
     <?php endif; ?>
-
-    <hr class="my-3">
-    <h5 class="mb-2">Add contact</h5>
-    <form method="post" action="<?= base_url('?page=clients/contact_add') ?>" class="row g-2">
-      <input type="hidden" name="client_id" value="<?= htmlspecialchars($id) ?>">
-      <div class="col-md-3">
-        <input type="text" name="contact_name" class="form-control form-control-sm" placeholder="Name" required>
-      </div>
-      <div class="col-md-2">
-        <input type="email" name="contact_email" class="form-control form-control-sm" placeholder="Email">
-      </div>
-      <div class="col-md-2">
-        <input type="text" name="contact_phone" class="form-control form-control-sm" placeholder="Phone">
-      </div>
-      <div class="col-md-2">
-        <input type="text" name="designation" class="form-control form-control-sm" placeholder="Designation">
-      </div>
-      <div class="col-md-2">
-        <div class="form-check">
-          <input type="checkbox" name="is_primary" value="1" class="form-check-input" id="new_primary">
-          <label class="form-check-label small" for="new_primary">Primary</label>
-        </div>
-      </div>
-      <div class="col-md-1">
-        <button type="submit" class="btn btn-primary btn-sm">Add</button>
-      </div>
-    </form>
   </div>
 </div>
+
+<!-- Add Contact Modal -->
+<div class="modal fade" id="addContactModal" tabindex="-1" aria-labelledby="addContactModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="<?= base_url('?page=client_contacts/store') ?>">
+        <input type="hidden" name="client_id" value="<?= htmlspecialchars($id) ?>">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addContactModalLabel">Add Contact</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Name <span class="text-danger">*</span></label>
+            <input type="text" name="contact_name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="contact_email" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Phone</label>
+            <input type="text" name="contact_phone" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Designation</label>
+            <input type="text" name="designation" class="form-control">
+          </div>
+          <div class="form-check">
+            <input type="checkbox" name="is_primary" value="1" class="form-check-input" id="add_is_primary">
+            <label class="form-check-label" for="add_is_primary">Primary contact</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Contact Modal -->
+<div class="modal fade" id="editContactModal" tabindex="-1" aria-labelledby="editContactModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="<?= base_url('?page=client_contacts/update') ?>" id="editContactForm">
+        <input type="hidden" name="id" id="edit_contact_id" value="">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editContactModalLabel">Edit Contact</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Name <span class="text-danger">*</span></label>
+            <input type="text" name="contact_name" id="edit_contact_name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="contact_email" id="edit_contact_email" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Phone</label>
+            <input type="text" name="contact_phone" id="edit_contact_phone" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Designation</label>
+            <input type="text" name="designation" id="edit_contact_designation" class="form-control">
+          </div>
+          <div class="form-check">
+            <input type="checkbox" name="is_primary" value="1" class="form-check-input" id="edit_is_primary">
+            <label class="form-check-label" for="edit_is_primary">Primary contact</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var editModalEl = document.getElementById('editContactModal');
+  document.querySelectorAll('.edit-contact').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.getElementById('edit_contact_id').value = this.dataset.id || '';
+      document.getElementById('edit_contact_name').value = this.dataset.name || '';
+      document.getElementById('edit_contact_email').value = this.dataset.email || '';
+      document.getElementById('edit_contact_phone').value = this.dataset.phone || '';
+      document.getElementById('edit_contact_designation').value = this.dataset.designation || '';
+      document.getElementById('edit_is_primary').checked = this.dataset.primary === '1';
+      var modal = new bootstrap.Modal(editModalEl);
+      modal.show();
+    });
+  });
+})();
+</script>
 
 <div class="card mt-3">
   <div class="card-header">

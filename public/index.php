@@ -75,14 +75,29 @@ switch ($page) {
         ClientController::create();
         break;
 
-    case 'clients/contact_add':
-        require __DIR__ . '/../app/controllers/ClientController.php';
-        ClientController::contactAdd();
+    case 'client_contacts':
+        require __DIR__ . '/../app/controllers/ClientContactController.php';
+        ClientContactController::index();
         break;
 
-    case 'clients/contact_primary':
-        require __DIR__ . '/../app/controllers/ClientController.php';
-        ClientController::contactSetPrimary();
+    case 'client_contacts/store':
+        require __DIR__ . '/../app/controllers/ClientContactController.php';
+        ClientContactController::store();
+        break;
+
+    case 'client_contacts/update':
+        require __DIR__ . '/../app/controllers/ClientContactController.php';
+        ClientContactController::update();
+        break;
+
+    case 'client_contacts/delete':
+        require __DIR__ . '/../app/controllers/ClientContactController.php';
+        ClientContactController::delete();
+        break;
+
+    case 'client_contacts/primary':
+        require __DIR__ . '/../app/controllers/ClientContactController.php';
+        ClientContactController::setPrimary();
         break;
 
     case 'interactions':
