@@ -5,7 +5,7 @@ class EmailTemplateController
     public static function generator(): void
     {
         $sb = supabase();
-        [$_, $templates] = $sb->get('email_templates', '?select=id,name,content&order=name');
+        [$_, $templates] = $sb->get('email_templates', '?is_active=eq.true&select=id,name,subject,body&order=name');
         $templates = is_array($templates) ? $templates : [];
 
         [$_, $clients] = $sb->get('clients', '?select=id,client_name&order=client_name');

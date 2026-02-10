@@ -11,17 +11,17 @@ class DashboardController
 
         $today = date('Y-m-d');
         $tomorrow = date('Y-m-d', strtotime($today . ' +1 day'));
-        $followUpsToday = $sb->count('interactions', "?created_at=gte.{$today}&created_at=lt.{$tomorrow}");
+        $followUpsToday = $sb->count('interactions', "?interaction_date=gte.{$today}&interaction_date=lte.{$today}");
 
-        [$status, $clients] = $sb->get('clients', '?select=status');
+        [$_, $clients] = $sb->get('clients', '?select=client_status');
         $statusCounts = [];
-        $statuses = ['Intro Email Sent', 'Follow-up Email Sent', 'Client Responded', 'No Response from Client', 'Client Acquired'];
+        $statuses = ['new', 'contacted', 'converted', 'lost'];
         foreach ($statuses as $s) {
             $statusCounts[$s] = 0;
         }
         if (is_array($clients)) {
             foreach ($clients as $row) {
-                $s = $row['status'] ?? '';
+                $s = $row['client_status'] ?? '';
                 $statusCounts[$s] = ($statusCounts[$s] ?? 0) + 1;
             }
         }

@@ -20,10 +20,10 @@ $title = $title ?? 'Calling Script';
           <div class="list-group">
             <?php foreach ($items as $row): ?>
               <div class="list-group-item">
-                <?php if (!empty($row['name'])): ?>
-                  <strong><?= htmlspecialchars($row['name']) ?></strong>
+                <?php if (!empty($row['title'])): ?>
+                  <strong><?= htmlspecialchars($row['title']) ?></strong>
                 <?php endif; ?>
-                <div class="mt-1"><?= nl2br(htmlspecialchars($row['content'] ?? $row['body'] ?? '')) ?></div>
+                <div class="mt-1"><?= nl2br(htmlspecialchars($row['content'] ?? '')) ?></div>
               </div>
             <?php endforeach; ?>
           </div>

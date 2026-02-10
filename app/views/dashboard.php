@@ -4,7 +4,7 @@ $totalClients = $totalClients ?? 0;
 $totalInteractions = $totalInteractions ?? 0;
 $followUpsToday = $followUpsToday ?? 0;
 $statusCounts = $statusCounts ?? [];
-$statuses = ['Intro Email Sent', 'Follow-up Email Sent', 'Client Responded', 'No Response from Client', 'Client Acquired'];
+$statuses = ['new', 'contacted', 'converted', 'lost'];
 ?>
 <div class="row">
   <div class="col-lg-3 col-6">
@@ -55,7 +55,7 @@ $statuses = ['Intro Email Sent', 'Follow-up Email Sent', 'Client Responded', 'No
               <div class="info-box">
                 <span class="info-box-icon bg-secondary"><i class="fas fa-tag"></i></span>
                 <div class="info-box-content">
-                  <span class="info-box-text"><?= htmlspecialchars($status) ?></span>
+                  <span class="info-box-text"><?= htmlspecialchars(ucfirst($status)) ?></span>
                   <span class="info-box-number"><?= (int) ($statusCounts[$status] ?? 0) ?></span>
                 </div>
               </div>

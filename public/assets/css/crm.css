@@ -1,0 +1,197 @@
+/* CRM – Tables, dropdowns, buttons */
+
+/* Tables */
+.card .table {
+  font-size: 0.9375rem;
+}
+.card .table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  color: #495057;
+  padding: 0.75rem 1rem;
+  white-space: nowrap;
+}
+.card .table tbody td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+.card .table tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.04);
+}
+.card .table .badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+}
+.card .table .btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+/* Table responsive wrapper */
+.table-responsive-crm {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Dropdowns / Selects */
+.form-select,
+.form-control {
+  border-radius: 0.375rem;
+  min-height: 38px;
+  border: 1px solid #ced4da;
+}
+.form-select:focus,
+.form-control:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+.form-select {
+  padding: 0.375rem 2rem 0.375rem 0.75rem;
+  background-color: #fff;
+  cursor: pointer;
+}
+.form-label {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0.35rem;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 0.375rem;
+  font-weight: 500;
+  padding: 0.375rem 0.75rem;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+.btn-secondary:hover {
+  background-color: #5c636a;
+  border-color: #565e64;
+}
+.card-footer .btn {
+  min-width: 5rem;
+}
+.card-footer .btn + .btn {
+  margin-left: 0.5rem;
+}
+
+/* Card footer spacing */
+.card-footer {
+  background-color: #fff;
+  border-top: 1px solid rgba(0, 0, 0, 0.125);
+  padding: 0.75rem 1.25rem;
+}
+
+/* Full-width footer fixed to viewport bottom (starts from left edge, under sidebar) */
+html, body {
+  min-height: 100vh;
+  margin: 0;
+}
+.wrapper {
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 57px - 3rem) !important;
+}
+.content-wrapper .content-header { flex-shrink: 0; }
+.content-wrapper section.content {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-bottom: 0;
+}
+/* Footer: full width from left edge (under sidebar), fixed to bottom, text centred in viewport */
+.main-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1030;
+  margin: 0 !important;
+}
+
+/* Header, sidebar, footer – reference theme #1f2d3d (AdminLTE dark) */
+:root {
+  --crm-dark-bg: #1f2d3d;
+  --crm-dark-text: rgba(255, 255, 255, 0.9);
+  --crm-active-bar: #3c8dbc;
+}
+
+/* Header (navbar) – dark, slim, logo + brand left, user + role + logout right */
+.main-header.navbar.navbar-dark-crm {
+  background-color: var(--crm-dark-bg);
+  border-bottom: none;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+.navbar-dark-crm .nav-link { color: var(--crm-dark-text) !important; }
+.navbar-dark-crm .nav-link:hover { color: #fff !important; }
+.navbar-dark-crm .navbar-logo { height: 28px; width: auto; }
+
+/* Sidebar – dark #1f2d3d, fixed height, scrollable, no scrollbar visible */
+.main-sidebar.sidebar-dark-crm {
+  background-color: var(--crm-dark-bg);
+}
+.main-sidebar .sidebar {
+  height: calc(100vh - 57px - 4.5rem);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.main-sidebar .sidebar::-webkit-scrollbar {
+  display: none;
+}
+/* Sidebar section headings (nav-header) */
+.sidebar-dark-crm .nav-header {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem 0.25rem;
+  margin: 0;
+  border: none;
+}
+.sidebar-dark-crm .brand-link,
+.sidebar-dark-crm .nav-link {
+  color: var(--crm-dark-text) !important;
+}
+.sidebar-dark-crm .nav-link:hover { color: #fff !important; }
+/* Active menu: light blue left bar + subtle background */
+.sidebar-dark-crm .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #fff !important;
+  border-left: 3px solid var(--crm-active-bar);
+  padding-left: calc(1rem - 3px);
+}
+
+/* Main footer – full width (under sidebar), dark, centered */
+.main-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--crm-dark-bg);
+  color: var(--crm-dark-text);
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+.main-footer a {
+  color: var(--crm-dark-text);
+}

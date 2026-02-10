@@ -2,10 +2,13 @@
 
 class InteractionController
 {
+    private const INTERACTION_TYPES = ['call', 'email', 'meeting', 'whatsapp'];
+    private const STAGES = ['intro', 'followup', 'closing'];
+
     public static function index(): void
     {
         $sb = supabase();
-        [$_, $rows] = $sb->get('interactions', '?select=*,clients(client_name)&order=created_at.desc');
+        [$_, $rows] = $sb->get('interactions', '?select=*,clients(client_name)&order=interaction_date.desc,created_at.desc');
         $list = is_array($rows) ? $rows : [];
 
         $title = 'Interactions';
@@ -23,15 +26,11 @@ class InteractionController
         }
 
         $sb = supabase();
-        $clientId = isset($_GET['client_id']) ? (int) $_GET['client_id'] : 0;
+        $clientId = isset($_GET['client_id']) ? trim((string) $_GET['client_id']) : '';
         [$_, $clients] = $sb->get('clients', '?select=id,client_name&order=client_name');
         $clients = is_array($clients) ? $clients : [];
 
         $title = 'Log Interaction';
-        $statuses = [
-            'Intro Email Sent', 'Follow-up Email Sent', 'Client Responded',
-            'No Response from Client', 'Client Acquired'
-        ];
         ob_start();
         include __DIR__ . '/../views/interactions/create.php';
         $content = ob_get_clean();
@@ -41,17 +40,27 @@ class InteractionController
     private static function store(): void
     {
         $sb = supabase();
-        $clientId = (int) ($_POST['client_id'] ?? 0);
-        $type = $_POST['type'] ?? 'email';
-        if (!in_array($type, ['email', 'call'], true)) {
+        $clientId = trim((string) ($_POST['client_id'] ?? ''));
+        $type = $_POST['interaction_type'] ?? 'email';
+        if (!in_array($type, self::INTERACTION_TYPES, true)) {
             $type = 'email';
+        }
+        $stage = $_POST['stage'] ?? 'intro';
+        if (!in_array($stage, self::STAGES, true)) {
+            $stage = 'intro';
+        }
+        $interactionDate = trim($_POST['interaction_date'] ?? date('Y-m-d'));
+        if ($interactionDate === '') {
+            $interactionDate = date('Y-m-d');
         }
 
         $data = [
             'client_id' => $clientId,
-            'type' => $type,
+            'interaction_type' => $type,
+            'stage' => $stage,
+            'subject' => trim($_POST['subject'] ?? ''),
             'notes' => trim($_POST['notes'] ?? ''),
-            'status_at_time' => trim($_POST['status_at_time'] ?? '')
+            'interaction_date' => $interactionDate
         ];
 
         $userId = $_SESSION['user_id'] ?? null;
@@ -62,12 +71,12 @@ class InteractionController
         [$code, $result] = $sb->post('interactions', $data);
 
         if ($code >= 200 && $code < 300) {
-            header('Location: ' . base_url('?page=clients&id=' . $clientId));
+            header('Location: ' . base_url('?page=clients&id=' . urlencode($clientId)));
             exit;
         }
 
         $_SESSION['form_error'] = is_array($result) ? ($result['message'] ?? 'Failed to log interaction') : 'Failed to log interaction';
-        header('Location: ' . base_url('?page=interactions/create&client_id=' . $clientId));
+        header('Location: ' . base_url('?page=interactions/create&client_id=' . urlencode($clientId)));
         exit;
     }
 }

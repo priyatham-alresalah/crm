@@ -1,7 +1,6 @@
 <?php
 $clients = $clients ?? [];
-$statuses = $statuses ?? [];
-$clientId = isset($_GET['client_id']) ? (int) $_GET['client_id'] : (int) ($_POST['client_id'] ?? 0);
+$clientId = isset($_GET['client_id']) ? trim((string) $_GET['client_id']) : trim((string) ($_POST['client_id'] ?? ''));
 $error = $_SESSION['form_error'] ?? '';
 if ($error) {
     unset($_SESSION['form_error']);
@@ -22,27 +21,38 @@ if ($error) {
         <select name="client_id" class="form-select" required>
           <option value="">— Select client —</option>
           <?php foreach ($clients as $c): ?>
-            <option value="<?= (int)($c['id'] ?? 0) ?>" <?= $clientId === (int)($c['id'] ?? 0) ? 'selected' : '' ?>><?= htmlspecialchars($c['client_name'] ?? '') ?></option>
+            <option value="<?= htmlspecialchars($c['id'] ?? '', ENT_QUOTES) ?>" <?= $clientId === ($c['id'] ?? '') ? 'selected' : '' ?>><?= htmlspecialchars($c['client_name'] ?? '') ?></option>
           <?php endforeach; ?>
         </select>
       </div>
 
       <div class="mb-3">
         <label class="form-label">Type</label>
-        <select name="type" class="form-select">
-          <option value="email" <?= ($_POST['type'] ?? '') === 'email' ? 'selected' : '' ?>>Email</option>
-          <option value="call" <?= ($_POST['type'] ?? '') === 'call' ? 'selected' : '' ?>>Call</option>
+        <select name="interaction_type" class="form-select">
+          <option value="email" <?= ($_POST['interaction_type'] ?? '') === 'email' ? 'selected' : '' ?>>Email</option>
+          <option value="call" <?= ($_POST['interaction_type'] ?? '') === 'call' ? 'selected' : '' ?>>Call</option>
+          <option value="meeting" <?= ($_POST['interaction_type'] ?? '') === 'meeting' ? 'selected' : '' ?>>Meeting</option>
+          <option value="whatsapp" <?= ($_POST['interaction_type'] ?? '') === 'whatsapp' ? 'selected' : '' ?>>WhatsApp</option>
         </select>
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Status at time of interaction</label>
-        <select name="status_at_time" class="form-select">
-          <option value="">— Optional —</option>
-          <?php foreach ($statuses as $s): ?>
-            <option value="<?= htmlspecialchars($s) ?>"><?= htmlspecialchars($s) ?></option>
-          <?php endforeach; ?>
+        <label class="form-label">Stage</label>
+        <select name="stage" class="form-select">
+          <option value="intro" <?= ($_POST['stage'] ?? '') === 'intro' ? 'selected' : '' ?>>Intro</option>
+          <option value="followup" <?= ($_POST['stage'] ?? '') === 'followup' ? 'selected' : '' ?>>Follow-up</option>
+          <option value="closing" <?= ($_POST['stage'] ?? '') === 'closing' ? 'selected' : '' ?>>Closing</option>
         </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Interaction date <span class="text-danger">*</span></label>
+        <input type="date" name="interaction_date" class="form-control" required value="<?= htmlspecialchars($_POST['interaction_date'] ?? date('Y-m-d')) ?>">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Subject</label>
+        <input type="text" name="subject" class="form-control" value="<?= htmlspecialchars($_POST['subject'] ?? '') ?>">
       </div>
 
       <div class="mb-3">

@@ -18,8 +18,13 @@ class AuthController
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
+        $setError = static function (string $msg): void {
+            Session::flash('login_error', $msg);
+            Session::set('login_error', $msg);
+        };
+
         if ($email === '' || $password === '') {
-            Session::flash('login_error', 'Email and password are required.');
+            $setError('Email and password are required.');
             header('Location: ' . BASE_URL);
             exit;
         }
@@ -27,7 +32,7 @@ class AuthController
         $auth = self::callSupabaseAuth($email, $password);
 
         if (isset($auth['error'])) {
-            Session::flash('login_error', self::authErrorMessage($auth));
+            $setError(self::authErrorMessage($auth));
             header('Location: ' . BASE_URL);
             exit;
         }
@@ -36,7 +41,7 @@ class AuthController
         $authUserId = $auth['user']['id'] ?? null;
 
         if (!$accessToken || !$authUserId) {
-            Session::flash('login_error', 'Invalid response from authentication service.');
+            $setError('Invalid response from authentication service.');
             header('Location: ' . BASE_URL);
             exit;
         }
@@ -44,19 +49,20 @@ class AuthController
         $profile = self::fetchUserProfile($authUserId, $accessToken);
 
         if ($profile === null) {
-            Session::flash('login_error', 'Your account is not set up or has been deactivated. Please contact an administrator.');
+            $setError('Your account is not set up in the system or you do not have access. Please contact an administrator.');
             header('Location: ' . BASE_URL);
             exit;
         }
 
         if (isset($profile['is_active']) && $profile['is_active'] === false) {
-            Session::flash('login_error', 'Your account has been deactivated. Please contact an administrator.');
+            $setError('Your account has been deactivated. Please contact an administrator.');
             header('Location: ' . BASE_URL);
             exit;
         }
 
         self::setSessionUser($accessToken, $profile);
         Session::remove('login_error');
+        unset($_SESSION['_flash']['login_error']);
         header('Location: ' . BASE_URL);
         exit;
     }

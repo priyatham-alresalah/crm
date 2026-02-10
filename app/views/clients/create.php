@@ -32,10 +32,16 @@ if ($error) {
       </div>
 
       <div class="mb-3">
+        <label class="form-label">Contact Number</label>
+        <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>" placeholder="Phone number">
+      </div>
+
+      <div class="mb-3">
         <label class="form-label">Status</label>
-        <select name="status" class="form-select">
+        <select name="client_status" class="form-select">
+          <option value="">— Optional —</option>
           <?php foreach ($statuses as $s): ?>
-            <option value="<?= htmlspecialchars($s) ?>" <?= ($_POST['status'] ?? '') === $s ? 'selected' : '' ?>><?= htmlspecialchars($s) ?></option>
+            <option value="<?= htmlspecialchars($s) ?>" <?= ($_POST['client_status'] ?? '') === $s ? 'selected' : '' ?>><?= htmlspecialchars(ucfirst($s)) ?></option>
           <?php endforeach; ?>
         </select>
       </div>

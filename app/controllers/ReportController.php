@@ -9,16 +9,16 @@ class ReportController
         $dateFrom = $_GET['date_from'] ?? date('Y-m-01');
         $dateTo = $_GET['date_to'] ?? date('Y-m-d');
 
-        [$_, $clients] = $sb->get('clients', '?select=status');
+        [$_, $clients] = $sb->get('clients', '?select=client_status');
         $clientsByStatus = [];
         if (is_array($clients)) {
             foreach ($clients as $row) {
-                $s = $row['status'] ?? '—';
+                $s = $row['client_status'] ?? '—';
                 $clientsByStatus[$s] = ($clientsByStatus[$s] ?? 0) + 1;
             }
         }
 
-        [$_, $interactions] = $sb->get('interactions', '?select=created_by,created_at&order=created_at.desc');
+        [$_, $interactions] = $sb->get('interactions', '?select=created_by,created_at,interaction_date&order=created_at.desc');
         $interactionsPerUser = [];
         $followUpsInRange = 0;
         if (is_array($interactions)) {
@@ -26,7 +26,7 @@ class ReportController
                 $uid = $row['created_by'] ?? 'unknown';
                 $interactionsPerUser[$uid] = ($interactionsPerUser[$uid] ?? 0) + 1;
                 $created = $row['created_at'] ?? '';
-                $datePart = substr($created, 0, 10);
+                $datePart = $row['interaction_date'] ?? substr($created, 0, 10);
                 if ($datePart >= $dateFrom && $datePart <= $dateTo) {
                     $followUpsInRange++;
                 }

@@ -45,6 +45,12 @@ class SupabaseClient
         return $this->request('PATCH', $url, $data);
     }
 
+    public function delete(string $table, string $filter)
+    {
+        $url = "{$this->url}/rest/v1/{$table}?{$filter}";
+        return $this->request('DELETE', $url);
+    }
+
     /**
      * Get total row count for a table (optional filter).
      * Uses Prefer: count=exact and returns integer.

@@ -5,7 +5,7 @@ class CallingScriptController
     public static function index(): void
     {
         $sb = supabase();
-        [$_, $scripts] = $sb->get('calling_scripts', '?select=*&order=stage_order,name');
+        [$_, $scripts] = $sb->get('calling_scripts', '?is_active=eq.true&select=*&order=stage,title');
         $scripts = is_array($scripts) ? $scripts : [];
 
         $byStage = [];

@@ -32,9 +32,9 @@ $title = $title ?? 'Reports';
           <div class="card-header">
             <h3 class="card-title">Clients by status</h3>
           </div>
-          <div class="card-body p-0">
-            <table class="table table-sm mb-0">
-              <thead>
+          <div class="card-body p-0 table-responsive-crm">
+            <table class="table table-sm table-bordered mb-0">
+              <thead class="table-light">
                 <tr>
                   <th>Status</th>
                   <th class="text-end">Count</th>
@@ -68,9 +68,9 @@ $title = $title ?? 'Reports';
           <div class="card-header">
             <h3 class="card-title">Interactions per user</h3>
           </div>
-          <div class="card-body p-0">
-            <table class="table table-sm mb-0">
-              <thead>
+          <div class="card-body p-0 table-responsive-crm">
+            <table class="table table-sm table-bordered mb-0">
+              <thead class="table-light">
                 <tr>
                   <th>User ID</th>
                   <th class="text-end">Count</th>

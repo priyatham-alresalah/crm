@@ -2,24 +2,18 @@
 
 class ClientController
 {
-    private const STATUSES = [
-        'Intro Email Sent',
-        'Follow-up Email Sent',
-        'Client Responded',
-        'No Response from Client',
-        'Client Acquired'
-    ];
+    private const CLIENT_STATUSES = ['new', 'contacted', 'converted', 'lost'];
 
     public static function index(): void
     {
-        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-        if ($id > 0) {
+        $id = isset($_GET['id']) ? trim((string) $_GET['id']) : '';
+        if ($id !== '') {
             self::view($id);
             return;
         }
 
         $sb = supabase();
-        [$status, $clients] = $sb->get('clients', '?select=*&order=created_at.desc');
+        [$_, $clients] = $sb->get('clients', '?select=*&order=created_at.desc');
         $list = is_array($clients) ? $clients : [];
 
         $title = 'Clients';
@@ -29,16 +23,16 @@ class ClientController
         include __DIR__ . '/../views/layout/master.php';
     }
 
-    private static function view(int $id): void
+    private static function view(string $id): void
     {
         $sb = supabase();
-        [$code, $rows] = $sb->get('clients', "?id=eq.{$id}&select=*");
+        [$code, $rows] = $sb->get('clients', '?id=eq.' . urlencode($id) . '&select=*');
         $client = (is_array($rows) && count($rows) > 0) ? $rows[0] : null;
         if (!$client) {
             header('Location: ' . base_url('?page=clients'));
             exit;
         }
-        [$_, $interactions] = $sb->get('interactions', "?client_id=eq.{$id}&select=*&order=created_at.desc");
+        [$_, $interactions] = $sb->get('interactions', '?client_id=eq.' . urlencode($id) . '&select=*&order=interaction_date.desc,created_at.desc');
         $timeline = is_array($interactions) ? $interactions : [];
 
         $title = 'Client: ' . ($client['client_name'] ?? '');
@@ -56,7 +50,7 @@ class ClientController
         }
 
         $title = 'Add Client';
-        $statuses = self::STATUSES;
+        $statuses = self::CLIENT_STATUSES;
         ob_start();
         include __DIR__ . '/../views/clients/create.php';
         $content = ob_get_clean();
@@ -68,19 +62,21 @@ class ClientController
         $sb = supabase();
         $userId = $_SESSION['user_id'] ?? null;
 
+        $phone = trim($_POST['phone'] ?? '');
+        $clientStatus = trim($_POST['client_status'] ?? '');
         $data = [
             'client_name' => trim($_POST['client_name'] ?? ''),
             'address' => trim($_POST['address'] ?? ''),
             'email' => trim($_POST['email'] ?? ''),
-            'status' => $_POST['status'] ?? 'Intro Email Sent'
+            'phone' => $phone === '' ? null : $phone
         ];
-
-        if (!in_array($data['status'], self::STATUSES, true)) {
-            $data['status'] = 'Intro Email Sent';
+        if ($clientStatus !== '' && in_array($clientStatus, self::CLIENT_STATUSES, true)) {
+            $data['client_status'] = $clientStatus;
         }
 
         if ($userId !== null) {
-            $data['user_id'] = $userId;
+            $data['created_by'] = $userId;
+            $data['assigned_to'] = $userId;
         }
 
         [$code, $result] = $sb->post('clients', $data);

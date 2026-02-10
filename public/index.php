@@ -100,6 +100,26 @@ switch ($page) {
         ReportController::index();
         break;
 
+    case 'users':
+        require __DIR__ . '/../app/controllers/UserController.php';
+        UserController::index();
+        break;
+
+    case 'users/create':
+        require __DIR__ . '/../app/controllers/UserController.php';
+        UserController::create();
+        break;
+
+    case 'users/edit':
+        require __DIR__ . '/../app/controllers/UserController.php';
+        UserController::edit();
+        break;
+
+    case 'users/delete':
+        require __DIR__ . '/../app/controllers/UserController.php';
+        UserController::delete();
+        break;
+
     default:
         require __DIR__ . '/../app/controllers/DashboardController.php';
         DashboardController::index();

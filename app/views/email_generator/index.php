@@ -10,7 +10,7 @@ $title = $title ?? 'Email Generator';
   <div class="card-body">
     <p class="text-muted">Select a template and optional client to fill placeholders. Copy to clipboard (no sending).</p>
 
-    <script>window.EMAIL_TEMPLATES = <?= json_encode(array_column($templates, 'content', 'id')) ?>;</script>
+    <script>window.EMAIL_TEMPLATES = <?= json_encode(array_column($templates, 'body', 'id')) ?>;</script>
     <div class="row">
       <div class="col-md-6">
         <div class="mb-3">
@@ -18,7 +18,7 @@ $title = $title ?? 'Email Generator';
           <select id="templateSelect" class="form-select">
             <option value="">— Select template —</option>
             <?php foreach ($templates as $t): ?>
-              <option value="<?= (int)($t['id'] ?? 0) ?>"><?= htmlspecialchars($t['name'] ?? '') ?></option>
+              <option value="<?= htmlspecialchars($t['id'] ?? '', ENT_QUOTES) ?>"><?= htmlspecialchars($t['name'] ?? '') ?></option>
             <?php endforeach; ?>
           </select>
         </div>
