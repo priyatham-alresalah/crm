@@ -33,10 +33,11 @@ class SupabaseClient
         return $this->request('GET', $url);
     }
 
-    public function post(string $table, array $data)
+    public function post(string $table, array $data, bool $returnRepresentation = false)
     {
         $url = "{$this->url}/rest/v1/{$table}";
-        return $this->request('POST', $url, $data);
+        $headers = $returnRepresentation ? ['Prefer: return=representation'] : [];
+        return $this->request('POST', $url, $data, $headers);
     }
 
     public function patch(string $table, string $filter, array $data)
@@ -76,13 +77,14 @@ class SupabaseClient
         return 0;
     }
 
-    private function request(string $method, string $url, array $data = null)
+    private function request(string $method, string $url, array $data = null, array $extraHeaders = [])
     {
+        $headers = array_merge($this->headers(), $extraHeaders);
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST  => $method,
-            CURLOPT_HTTPHEADER     => $this->headers()
+            CURLOPT_HTTPHEADER     => $headers
         ]);
 
         if ($data) {

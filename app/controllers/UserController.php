@@ -21,7 +21,10 @@ class UserController
         self::requireAdmin();
         $sb = supabase();
         [$_, $rows] = $sb->get('users', '?select=*&order=name.asc');
-        $list = is_array($rows) ? $rows : [];
+        $raw = is_array($rows) ? $rows : [];
+        $list = array_values(array_filter($raw, static function ($u) {
+            return trim((string) ($u['name'] ?? '')) !== '' || trim((string) ($u['role'] ?? '')) !== '';
+        }));
 
         $title = 'Users';
         ob_start();

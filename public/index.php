@@ -75,6 +75,16 @@ switch ($page) {
         ClientController::create();
         break;
 
+    case 'clients/contact_add':
+        require __DIR__ . '/../app/controllers/ClientController.php';
+        ClientController::contactAdd();
+        break;
+
+    case 'clients/contact_primary':
+        require __DIR__ . '/../app/controllers/ClientController.php';
+        ClientController::contactSetPrimary();
+        break;
+
     case 'interactions':
         require __DIR__ . '/../app/controllers/InteractionController.php';
         InteractionController::index();

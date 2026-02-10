@@ -7,25 +7,24 @@ $title = $title ?? 'Interactions';
     <h3 class="card-title mb-0">Recent interactions</h3>
     <a href="<?= base_url('?page=interactions/create') ?>" class="btn btn-primary btn-sm">Log interaction</a>
   </div>
-  <div class="card-body p-0 table-responsive-crm">
-    <table class="table table-hover table-striped table-bordered mb-0">
-      <thead class="table-light">
-        <tr>
-          <th>Date</th>
-          <th>Client</th>
-          <th>Type</th>
-          <th>Stage</th>
-          <th>Subject</th>
-          <th>Notes</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php if (empty($list)): ?>
+  <div class="card-body">
+    <?php if (empty($list)): ?>
+    <p class="text-muted mb-0 py-4 text-center">No interactions yet. <a href="<?= base_url('?page=interactions/create') ?>">Log one</a>.</p>
+    <?php else: ?>
+    <div class="table-responsive-crm p-0">
+      <table class="table table-hover table-striped table-bordered mb-0">
+        <thead class="table-light">
           <tr>
-            <td colspan="7" class="text-center text-muted py-4">No interactions yet.</td>
+            <th>Date</th>
+            <th>Client</th>
+            <th>Type</th>
+            <th>Stage</th>
+            <th>Subject</th>
+            <th>Notes</th>
+            <th></th>
           </tr>
-        <?php else: ?>
+        </thead>
+        <tbody>
           <?php foreach ($list as $row): ?>
             <?php
             $clientName = $row['clients']['client_name'] ?? $row['client_name'] ?? '—';
@@ -45,8 +44,9 @@ $title = $title ?? 'Interactions';
               </td>
             </tr>
           <?php endforeach; ?>
-        <?php endif; ?>
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
+    <?php endif; ?>
   </div>
 </div>

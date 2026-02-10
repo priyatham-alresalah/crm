@@ -27,16 +27,6 @@ if ($error) {
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Contact Number</label>
-        <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>" placeholder="Phone number">
-      </div>
-
-      <div class="mb-3">
         <label class="form-label">Status</label>
         <select name="client_status" class="form-select">
           <option value="">— Optional —</option>
@@ -44,6 +34,26 @@ if ($error) {
             <option value="<?= htmlspecialchars($s) ?>" <?= ($_POST['client_status'] ?? '') === $s ? 'selected' : '' ?>><?= htmlspecialchars(ucfirst($s)) ?></option>
           <?php endforeach; ?>
         </select>
+      </div>
+
+      <hr class="my-4">
+      <h5 class="mb-3">Primary Contact Person</h5>
+      <p class="text-muted small mb-3">Required when creating a client.</p>
+      <div class="mb-3">
+        <label class="form-label">Contact Name <span class="text-danger">*</span></label>
+        <input type="text" name="contact_name" class="form-control" required value="<?= htmlspecialchars($_POST['contact_name'] ?? '') ?>">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Contact Email</label>
+        <input type="email" name="contact_email" class="form-control" value="<?= htmlspecialchars($_POST['contact_email'] ?? '') ?>">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Contact Phone</label>
+        <input type="text" name="contact_phone" class="form-control" value="<?= htmlspecialchars($_POST['contact_phone'] ?? '') ?>" placeholder="Phone number">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Designation</label>
+        <input type="text" name="designation" class="form-control" value="<?= htmlspecialchars($_POST['designation'] ?? '') ?>" placeholder="e.g. Manager, CEO">
       </div>
     </div>
     <div class="card-footer">

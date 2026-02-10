@@ -9,7 +9,15 @@ class InteractionController
     {
         $sb = supabase();
         [$_, $rows] = $sb->get('interactions', '?select=*,clients(client_name)&order=interaction_date.desc,created_at.desc');
-        $list = is_array($rows) ? $rows : [];
+        $raw = is_array($rows) ? $rows : [];
+        $list = array_values(array_filter($raw, static function ($row) {
+            $clientId = trim((string) ($row['client_id'] ?? ''));
+            $clientName = trim((string) (($row['clients']['client_name'] ?? $row['client_name'] ?? '')));
+            $type = trim((string) ($row['interaction_type'] ?? ''));
+            $subject = trim((string) ($row['subject'] ?? ''));
+            $notes = trim((string) ($row['notes'] ?? ''));
+            return ($clientId !== '' || $clientName !== '') && ($type !== '' || $subject !== '' || $notes !== '');
+        }));
 
         $title = 'Interactions';
         ob_start();
