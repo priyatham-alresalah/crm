@@ -1,84 +1,159 @@
 <?php
 $templates = $templates ?? [];
-$clients = $clients ?? [];
+$categories = $categories ?? ['All', 'Intro', 'Follow-up', 'Reminder', 'Closure'];
 $title = $title ?? 'Email Generator';
+$templatesJson = json_encode($templates);
 ?>
 <div class="card">
   <div class="card-header">
     <h3 class="card-title mb-0">Email Generator</h3>
   </div>
   <div class="card-body">
-    <p class="text-muted">Select a template and optional client to fill placeholders. Copy to clipboard (no sending).</p>
+    <p class="text-muted mb-3">Select a category and template. Edit subject/body if needed. Copy to clipboard (no sending). Placeholders: <code>{{client_name}}</code>, <code>{{contact_name}}</code> left for future linking.</p>
 
-    <script>window.EMAIL_TEMPLATES = <?= json_encode(array_column($templates, 'body', 'id')) ?>;</script>
-    <div class="row">
-      <div class="col-md-6">
-        <div class="mb-3">
-          <label class="form-label">Template</label>
-          <select id="templateSelect" class="form-select">
-            <option value="">— Select template —</option>
-            <?php foreach ($templates as $t): ?>
-              <option value="<?= htmlspecialchars($t['id'] ?? '', ENT_QUOTES) ?>"><?= htmlspecialchars($t['name'] ?? '') ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Client (for {{client_name}})</label>
-          <select id="clientSelect" class="form-select">
-            <option value="">— None —</option>
-            <?php foreach ($clients as $c): ?>
-              <option value="<?= htmlspecialchars($c['client_name'] ?? '', ENT_QUOTES) ?>"><?= htmlspecialchars($c['client_name'] ?? '') ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Your name (for {{your_name}})</label>
-          <input type="text" id="yourName" class="form-control" placeholder="Your name">
-        </div>
-        <button type="button" id="fillBtn" class="btn btn-primary">Fill placeholders</button>
-        <button type="button" id="copyBtn" class="btn btn-success">Copy to clipboard</button>
+    <div class="row g-3 mb-3">
+      <div class="col-md-3">
+        <label class="form-label">Category</label>
+        <select id="categorySelect" class="form-select">
+          <?php foreach ($categories as $cat): ?>
+            <option value="<?= htmlspecialchars($cat, ENT_QUOTES) ?>"><?= htmlspecialchars($cat) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-5">
+        <label class="form-label">Template Name</label>
+        <select id="templateSelect" class="form-select">
+          <option value="">— Select template —</option>
+          <?php foreach ($templates as $t): ?>
+            <option value="<?= (int) ($t['id'] ?? 0) ?>" data-category="<?= htmlspecialchars((string) ($t['category'] ?? ''), ENT_QUOTES) ?>"><?= htmlspecialchars($t['name'] ?? '') ?></option>
+          <?php endforeach; ?>
+        </select>
       </div>
     </div>
 
-    <div class="mt-4">
-      <label class="form-label">Preview / Content</label>
-      <textarea id="previewContent" class="form-control" rows="12" placeholder="Select a template and click Fill placeholders."></textarea>
+    <div class="mb-3">
+      <label class="form-label">Subject</label>
+      <input type="text" id="subjectInput" class="form-control" placeholder="Email subject">
     </div>
+
+    <div class="mb-3">
+      <label class="form-label">Body</label>
+      <textarea id="bodyInput" class="form-control" rows="14" placeholder="Select a template to fill subject and body."></textarea>
+    </div>
+
+    <button type="button" id="copyBtn" class="btn btn-success">Copy Email</button>
+  </div>
+</div>
+
+<div id="emailToast" class="toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 1090;">
+  <div class="d-flex">
+    <div class="toast-body">Email copied to clipboard.</div>
+    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
   </div>
 </div>
 
 <script>
 (function() {
+  var CATEGORY_ALL = 'All';
+  var categorySelect = document.getElementById('categorySelect');
   var templateSelect = document.getElementById('templateSelect');
-  var clientSelect = document.getElementById('clientSelect');
-  var yourName = document.getElementById('yourName');
-  var preview = document.getElementById('previewContent');
-  var fillBtn = document.getElementById('fillBtn');
+  var subjectInput = document.getElementById('subjectInput');
+  var bodyInput = document.getElementById('bodyInput');
   var copyBtn = document.getElementById('copyBtn');
+  var toastEl = document.getElementById('emailToast');
 
-  function getTemplateContent() {
-    var id = templateSelect.value;
-    return (window.EMAIL_TEMPLATES && window.EMAIL_TEMPLATES[id]) ? window.EMAIL_TEMPLATES[id] : '';
+  var templates = <?= $templatesJson ?>;
+
+  function getTemplatesByCategory() {
+    var cat = categorySelect.value;
+    if (cat === CATEGORY_ALL) return templates;
+    return templates.filter(function(t) { return (t.category || '') === cat; });
   }
 
-  fillBtn.addEventListener('click', function() {
-    var content = getTemplateContent();
-    var clientName = clientSelect.value;
-    var name = yourName.value.trim();
-    content = content.replace(/\{\{client_name\}\}/g, clientName || '{{client_name}}');
-    content = content.replace(/\{\{your_name\}\}/g, name || '{{your_name}}');
-    preview.value = content;
+  function refreshTemplateOptions() {
+    var list = getTemplatesByCategory();
+    var current = templateSelect.value;
+    templateSelect.innerHTML = '<option value="">— Select template —</option>';
+    list.forEach(function(t) {
+      var opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.name || ('Template ' + t.id);
+      opt.dataset.subject = t.subject || '';
+      opt.dataset.body = t.body || '';
+      templateSelect.appendChild(opt);
+    });
+    if (current && list.some(function(t) { return String(t.id) === current; })) {
+      templateSelect.value = current;
+    } else {
+      subjectInput.value = '';
+      bodyInput.value = '';
+    }
+  }
+
+  function fillFromTemplate() {
+    var opt = templateSelect.options[templateSelect.selectedIndex];
+    if (!opt || !opt.value) {
+      subjectInput.value = '';
+      bodyInput.value = '';
+      return;
+    }
+    subjectInput.value = opt.dataset.subject || '';
+    bodyInput.value = opt.dataset.body || '';
+  }
+
+  categorySelect.addEventListener('change', function() {
+    refreshTemplateOptions();
+    fillFromTemplate();
   });
 
-  templateSelect.addEventListener('change', function() {
-    preview.value = getTemplateContent();
-  });
+  templateSelect.addEventListener('change', fillFromTemplate);
 
   copyBtn.addEventListener('click', function() {
-    preview.select();
-    document.execCommand('copy');
-    copyBtn.textContent = 'Copied!';
-    setTimeout(function() { copyBtn.textContent = 'Copy to clipboard'; }, 2000);
+    var subject = subjectInput.value.trim();
+    var body = bodyInput.value.trim();
+    var text = subject ? (subject + '\n\n' + body) : body;
+    if (!text) {
+      if (typeof bootstrap !== 'undefined' && toastEl) {
+        var t = new bootstrap.Toast(toastEl);
+        toastEl.querySelector('.toast-body').textContent = 'Nothing to copy. Select a template first.';
+        toastEl.classList.remove('text-bg-success');
+        toastEl.classList.add('text-bg-warning');
+        t.show();
+        setTimeout(function() { toastEl.classList.remove('text-bg-warning'); toastEl.classList.add('text-bg-success'); toastEl.querySelector('.toast-body').textContent = 'Email copied to clipboard.'; }, 0);
+      }
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        if (toastEl && typeof bootstrap !== 'undefined') {
+          var toast = new bootstrap.Toast(toastEl);
+          toastEl.querySelector('.toast-body').textContent = 'Email copied to clipboard.';
+          toast.show();
+        } else {
+          copyBtn.textContent = 'Copied!';
+          setTimeout(function() { copyBtn.textContent = 'Copy Email'; }, 2000);
+        }
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (toastEl && typeof bootstrap !== 'undefined') {
+        var t = new bootstrap.Toast(toastEl);
+        toastEl.querySelector('.toast-body').textContent = 'Email copied to clipboard.';
+        t.show();
+      } else {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(function() { copyBtn.textContent = 'Copy Email'; }, 2000);
+      }
+    }
   });
+
+  refreshTemplateOptions();
 })();
 </script>
