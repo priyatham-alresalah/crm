@@ -1,0 +1,14 @@
+# When document root is project root: only allow index.php (forwards to public/); block .env and code
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^\.env - [F,L]
+    RewriteRule ^\.git - [F,L]
+    RewriteRule ^app/ - [F,L]
+    RewriteRule ^database/ - [F,L]
+    RewriteRule ^storage/ - [F,L]
+</IfModule>
+<Files "index.php">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+</Files>

@@ -2,23 +2,32 @@
 
 class CallingScriptController
 {
+    /** Map DB enum values to display labels (enum may use follow_up, closure, etc.) */
+    private const STAGE_LABELS = [
+        'intro' => 'Intro',
+        'follow_up' => 'Follow-up',
+        'followup' => 'Follow-up',
+        'objection_handling' => 'Objection handling',
+        'closure' => 'Closing',
+        'closing' => 'Closing',
+    ];
+
     public static function index(): void
     {
+        Auth::requireLogin();
         $sb = supabase();
-        [$_, $scripts] = $sb->get('calling_scripts', '?is_active=eq.true&select=*&order=stage,title');
-        $scripts = is_array($scripts) ? $scripts : [];
+        [$status, $scripts] = $sb->get('calling_scripts', '?select=id,stage,title,content&order=stage.asc,title.asc');
+        $scripts = ($status >= 400 || !is_array($scripts)) ? [] : $scripts;
 
-        $byStage = [];
         $stages = ['Intro', 'Follow-up', 'Objection handling', 'Closing'];
-        foreach ($stages as $s) {
-            $byStage[$s] = [];
-        }
+        $byStage = array_fill_keys($stages, []);
         foreach ($scripts as $row) {
-            $stage = $row['stage'] ?? 'Intro';
-            if (!isset($byStage[$stage])) {
-                $byStage[$stage] = [];
+            $stageKey = $row['stage'] ?? 'intro';
+            $label = self::STAGE_LABELS[$stageKey] ?? ucfirst((string) $stageKey);
+            if (!isset($byStage[$label])) {
+                $byStage[$label] = [];
             }
-            $byStage[$stage][] = $row;
+            $byStage[$label][] = $row;
         }
 
         $title = 'Calling Script';

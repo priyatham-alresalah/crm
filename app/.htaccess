@@ -1,0 +1,4 @@
+# Block web access to application code (use when doc root is project root by mistake)
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>

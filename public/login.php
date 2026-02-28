@@ -160,10 +160,26 @@
   <span>Al Resalah Consulting & Training</span>
 </header>
 
+<?php
+Session::start();
+$loginError = Session::get('login_error');
+if ($loginError !== null && $loginError !== '') {
+    Session::remove('login_error');
+    if (isset($_SESSION['_flash']['login_error'])) {
+        unset($_SESSION['_flash']['login_error']);
+    }
+}
+?>
 <main class="login-main">
   <div class="login-card">
 
     <h1>Login</h1>
+
+    <?php if (!empty($loginError)): ?>
+    <div class="alert alert-danger mb-3" role="alert">
+      <?= htmlspecialchars($loginError) ?>
+    </div>
+    <?php endif; ?>
 
     <form method="post" action="">
 

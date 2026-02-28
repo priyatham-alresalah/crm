@@ -1,11 +1,13 @@
-# CRM – Apache config for cPanel/subdomain (document root = public/)
+# CRM – Apache config for cPanel subdomain (document root = public/)
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
 
-    # Redirect to HTTPS in production (optional; enable on cPanel)
-    # RewriteCond %{HTTPS} off
-    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    # Force HTTPS on production (skip on localhost for XAMPP)
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} !^localhost(\:[0-9]+)?$ [NC]
+    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1(\:[0-9]+)?$ [NC]
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # Allow direct access to existing files and directories
     RewriteCond %{REQUEST_FILENAME} !-f
@@ -18,7 +20,9 @@
 # Prevent directory listing
 Options -Indexes
 
-# Optional: protect .env and app code if any request slips through
+# Block access to hidden files (e.g. .env if ever placed here)
 <FilesMatch "^\.">
-    Require all denied
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
 </FilesMatch>

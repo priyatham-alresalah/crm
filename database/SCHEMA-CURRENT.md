@@ -5,6 +5,7 @@ This file describes the schema the CRM application is aligned with. Table order 
 ## Tables
 
 - **users** – `id` (uuid, FK auth.users), `name`, `role` (enum user_role), `is_active`, `created_at`
+- **profiles** – `id` (uuid, FK auth.users), `full_name`, `email`, `phone`, `avatar_url`, `updated_at` — user-editable profile data (Supabase recommended pattern)
 - **clients** – `id` (uuid), `client_name`, `address`, `email`, `phone`, `client_status` (enum), `assigned_to` (FK users), `created_by` (FK users), `created_at`
 - **client_contacts** – `id` (uuid), `client_id` (FK clients), `contact_name`, `contact_email`, `contact_phone`, `designation`, `is_primary`, `created_at`
 - **interactions** – `id` (uuid), `client_id` (FK clients), `interaction_type` (enum), `stage` (enum), `subject`, `notes`, `interaction_date`, `created_by` (FK users), `created_at`
@@ -20,7 +21,7 @@ This file describes the schema the CRM application is aligned with. Table order 
 | **Interactions** | Uses `interaction_type` (call, email, meeting, whatsapp), `stage` (intro, followup, closing), `subject`, `notes`, `interaction_date`, `created_by`. |
 | **Email templates** | No `content` column; uses `name`, `category`, `subject`, `body`, `is_active`. Categories in app: Intro, Follow-up, Meeting Request, Reminder, Thank You, Closure. If your `category` enum differs, adjust seeders or app constants. |
 | **Calling scripts** | Uses `title`, `stage`, `content`, `is_active`. Ordered by `stage`, `title`. |
-| **Users** | Auth reads `public.users` by `id`; session stores `user_id`, `user_name`, `user_role`. |
+| **Users** | Auth reads `public.users` by `id`; session stores `user_id`, `user_name`, `user_role`. My Profile reads/writes `public.profiles` (full_name, email, phone). |
 
 ## Enums
 

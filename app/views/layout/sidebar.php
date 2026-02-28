@@ -74,7 +74,7 @@
         </li>
         <li class="nav-item">
           <a href="<?= base_url('?page=daily_progress') ?>" class="nav-link <?= $page === 'daily_progress' ? 'active' : '' ?>">
-            <i class="nav-icon fas fa-list-check"></i>
+            <i class="nav-icon fas fa-clipboard-list"></i>
             <p>Daily Progress</p>
           </a>
         </li>

@@ -60,6 +60,21 @@ class AuthController
             exit;
         }
 
+        // Prefer display name and profile data from profiles (updated via My Profile) over users
+        $profileRow = self::fetchProfileRow($authUserId, $accessToken);
+        if ($profileRow !== null) {
+            $displayName = isset($profileRow['full_name']) ? trim((string) $profileRow['full_name']) : '';
+            if ($displayName !== '') {
+                $profile['name'] = $displayName;
+            }
+            $profile['email'] = isset($profileRow['email']) ? trim((string) $profileRow['email']) : '';
+            $profile['phone'] = isset($profileRow['phone']) ? trim((string) $profileRow['phone']) : '';
+        }
+        // If still no email, use auth.users (e.g. first login before profile has email)
+        if ($profile['email'] === '' && isset($auth['user']['email'])) {
+            $profile['email'] = trim((string) $auth['user']['email']);
+        }
+
         self::setSessionUser($accessToken, $profile);
         Session::remove('login_error');
         unset($_SESSION['_flash']['login_error']);
@@ -158,6 +173,54 @@ class AuthController
         return $rows[0];
     }
 
+    /**
+     * Fetch display name (and email, phone) from public.profiles so data updated on My Profile persists after re-login.
+     * Uses service role when available so the read is not blocked by RLS on server-side requests.
+     */
+    private static function fetchProfileRow(string $userId, string $jwt): ?array
+    {
+        $baseUrl = rtrim(SUPABASE_URL, '/');
+        $url = $baseUrl . '/rest/v1/profiles?id=eq.' . urlencode($userId) . '&select=full_name,email,phone';
+        $serviceKey = defined('SUPABASE_SERVICE_ROLE_KEY') ? (SUPABASE_SERVICE_ROLE_KEY ?: '') : '';
+        $useServiceRole = $serviceKey !== '';
+
+        $headers = [
+            'Content-Type: application/json',
+            'apikey: ' . ($useServiceRole ? $serviceKey : SUPABASE_ANON_KEY),
+            'Authorization: Bearer ' . ($useServiceRole ? $serviceKey : $jwt),
+        ];
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_TIMEOUT => 10,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($httpCode !== 200) {
+            return null;
+        }
+        $rows = json_decode($response, true);
+        if (!is_array($rows) || count($rows) === 0) {
+            return null;
+        }
+        return $rows[0];
+    }
+
+    /**
+     * Fetch display name from public.profiles.full_name so name updated on My Profile persists after re-login.
+     */
+    private static function fetchProfileDisplayName(string $userId, string $jwt): ?string
+    {
+        $row = self::fetchProfileRow($userId, $jwt);
+        if ($row === null) {
+            return null;
+        }
+        $fullName = isset($row['full_name']) ? trim((string) $row['full_name']) : null;
+        return ($fullName !== null && $fullName !== '') ? $fullName : null;
+    }
+
     private static function setSessionUser(string $jwt, array $profile): void
     {
         Session::set('jwt', $jwt);
@@ -165,6 +228,8 @@ class AuthController
         Session::set('user_name', $profile['name'] ?? '');
         Session::set('user_role', $profile['role'] ?? 'user');
         Session::set('user_branch_id', $profile['branch_id'] ?? null);
+        Session::set('user_email', $profile['email'] ?? '');
+        Session::set('user_phone', $profile['phone'] ?? '');
         Session::set('last_activity', time());
     }
 

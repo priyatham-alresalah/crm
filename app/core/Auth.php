@@ -31,6 +31,16 @@ class Auth
         return Session::get('user_branch_id');
     }
 
+    public static function email(): ?string
+    {
+        return Session::get('user_email');
+    }
+
+    public static function phone(): ?string
+    {
+        return Session::get('user_phone');
+    }
+
     public static function check(): bool
     {
         $id = self::id();

@@ -27,24 +27,9 @@ Lightweight PHP CRM using **Supabase** (PostgreSQL + Auth) and **AdminLTE 3** (B
    - **XAMPP**: Open `http://localhost/crm/public/` (or `http://localhost/crm/` if you use the root `index.php` that loads `public/index.php`).
    - **cPanel**: Point document root to `public/` or set `BASE_URL` to match your URL.
 
-## Hosting on cPanel as a subdomain
+## Hosting on cPanel as subdomain
 
-To run the CRM on a subdomain (e.g. `https://crm.yourdomain.com`):
-
-1. **Create the subdomain** in cPanel (Subdomains): e.g. `crm` → `crm.yourdomain.com`.
-
-2. **Set the document root** for that subdomain to the **`public`** folder of this project:
-   - In cPanel → Subdomains → Edit, set "Document Root" to the path that ends with `/public`, e.g. `crm/public` (so the subdomain serves only the contents of `public/`, not the whole repo).
-
-3. **Upload the project** so that the subdomain’s document root is exactly the `public` directory (e.g. upload the full repo and point the subdomain to `crm/public`).
-
-4. **Configure `.env`** (copy from `.env.example`):
-   - `SUPABASE_URL` and `SUPABASE_ANON_KEY` as usual.
-   - **`BASE_URL=/`** for subdomain (root of the subdomain; no path prefix).
-
-5. **Apache**: The repo includes `public/.htaccess` so that all requests are routed to `index.php`. Ensure **mod_rewrite** is enabled (cPanel usually has it on).
-
-6. **Optional**: In `public/.htaccess` you can uncomment the HTTPS redirect lines to force SSL on the subdomain.
+To run at **https://crm.alresalahct.com/** see **[HOSTING.md](HOSTING.md)** for step-by-step cPanel setup (subdomain, document root = `public/`, `.env`, SSL).
 
 ## Architecture
 

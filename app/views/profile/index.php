@@ -1,8 +1,12 @@
 <?php
 $profile = $profile ?? ['name' => '', 'email' => '', 'phone' => ''];
 $error = $_SESSION['form_error'] ?? '';
+$success = $_SESSION['form_success'] ?? '';
 if ($error) {
     unset($_SESSION['form_error']);
+}
+if ($success) {
+    unset($_SESSION['form_success']);
 }
 ?>
 <div class="card">
@@ -11,8 +15,11 @@ if ($error) {
   </div>
   <form method="post" action="<?= base_url('?page=profile') ?>">
     <div class="card-body">
+      <?php if ($success): ?>
+        <div class="alert alert-success mb-3"><?= htmlspecialchars($success) ?></div>
+      <?php endif; ?>
       <?php if ($error): ?>
-        <div class="alert alert-info mb-3"><?= htmlspecialchars($error) ?></div>
+        <div class="alert alert-warning mb-3"><?= htmlspecialchars($error) ?></div>
       <?php endif; ?>
 
       <div class="mb-3">

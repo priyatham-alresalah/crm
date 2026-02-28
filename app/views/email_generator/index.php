@@ -5,16 +5,17 @@ $clientsForEmail = $clientsForEmail ?? [];
 $title = $title ?? 'Email Generator';
 $templatesJson = json_encode($templates);
 ?>
-<div class="card">
-  <div class="card-header">
+<div class="card shadow-sm">
+  <div class="card-header bg-white py-3">
     <h3 class="card-title mb-0">Email Generator</h3>
   </div>
   <div class="card-body">
-    <p class="text-muted mb-4">Select a client to fill in the client name and contact person in the email, then pick a category and template. Edit the subject and body if needed and copy to clipboard. This tool does not send emails.</p>
-    <p class="small text-muted mb-4">Filled automatically: company name, today’s date, and your name. When you select a client, the client name and primary contact name are inserted in the template.</p>
-
+    <div class="alert alert-light border mb-4">
+      <p class="mb-1"><strong>How it works:</strong> Select a client (optional), category, and template. Edit subject and body if needed, then use <strong>Copy Email</strong> to copy to clipboard. This tool does not send emails.</p>
+      <p class="mb-0 small text-muted">Auto-filled: company name, today's date, your name; when a client is selected, client name and primary contact name are inserted.</p>
+    </div>
     <div class="row g-3 mb-4">
-      <div class="col-md-4">
+      <div class="col-12 col-md-4">
         <label class="form-label fw-semibold">Client</label>
         <select id="clientSelect" class="form-select">
           <option value="">— Select client (optional) —</option>
@@ -23,7 +24,7 @@ $templatesJson = json_encode($templates);
           <?php endforeach; ?>
         </select>
       </div>
-      <div class="col-md-2">
+      <div class="col-12 col-md-3">
         <label class="form-label fw-semibold">Category</label>
         <select id="categorySelect" class="form-select">
           <?php foreach ($categories as $opt): ?>
@@ -31,7 +32,7 @@ $templatesJson = json_encode($templates);
           <?php endforeach; ?>
         </select>
       </div>
-      <div class="col-md-4">
+      <div class="col-12 col-md-5">
         <label class="form-label fw-semibold">Template Name</label>
         <select id="templateSelect" class="form-select">
           <option value="">— Select template —</option>
@@ -52,7 +53,15 @@ $templatesJson = json_encode($templates);
       <textarea id="bodyInput" class="form-control" rows="14" placeholder="Select a template to fill subject and body."></textarea>
     </div>
 
-    <button type="button" id="copyBtn" class="btn btn-success btn-lg">Copy Email</button>
+    <div class="d-flex flex-wrap align-items-center gap-2 pt-3 border-top">
+      <button type="button" id="copyBtn" class="btn btn-success btn-lg px-4">
+        <i class="fas fa-copy me-2" aria-hidden="true"></i>Copy Email
+      </button>
+      <button type="button" id="clearBtn" class="btn btn-outline-secondary">
+        <i class="fas fa-eraser me-1" aria-hidden="true"></i>Clear
+      </button>
+      <span id="copyHint" class="text-muted small ms-2">Subject + body copied as plain text.</span>
+    </div>
   </div>
 </div>
 
@@ -157,7 +166,11 @@ $templatesJson = json_encode($templates);
         toastEl.classList.remove('text-bg-success');
         toastEl.classList.add('text-bg-warning');
         t.show();
-        setTimeout(function() { toastEl.classList.remove('text-bg-warning'); toastEl.classList.add('text-bg-success'); toastEl.querySelector('.toast-body').textContent = 'Email copied to clipboard.'; }, 0);
+        setTimeout(function() {
+          toastEl.classList.remove('text-bg-warning');
+          toastEl.classList.add('text-bg-success');
+          toastEl.querySelector('.toast-body').textContent = 'Email copied to clipboard.';
+        }, 100);
       }
       return;
     }
@@ -191,6 +204,15 @@ $templatesJson = json_encode($templates);
       }
     }
   });
+
+  var clearBtn = document.getElementById('clearBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      subjectInput.value = '';
+      bodyInput.value = '';
+      if (templateSelect.options.length > 1) templateSelect.selectedIndex = 0;
+    });
+  }
 
   refreshTemplateOptions();
 })();
