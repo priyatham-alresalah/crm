@@ -41,6 +41,10 @@ class UserController
             return;
         }
 
+        $sb = supabase();
+        [$_, $branchRows] = $sb->get('branches', '?is_active=eq.true&select=id,name&order=name.asc');
+        $branches = is_array($branchRows) ? $branchRows : [];
+
         $title = 'Add User';
         $roles = self::ROLES;
         $error = $_SESSION['form_error'] ?? '';
@@ -59,10 +63,17 @@ class UserController
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
         $name = trim($_POST['name'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
         $role = trim($_POST['role'] ?? 'user');
+        $branchId = trim($_POST['branch_id'] ?? '');
 
         if ($email === '' || $password === '') {
             $_SESSION['form_error'] = 'Email and password are required.';
+            header('Location: ' . base_url('?page=users/create'));
+            exit;
+        }
+        if ($branchId === '') {
+            $_SESSION['form_error'] = 'Branch is required.';
             header('Location: ' . base_url('?page=users/create'));
             exit;
         }
@@ -79,14 +90,18 @@ class UserController
 
         $authUrl = SUPABASE_URL . '/auth/v1/admin/users';
         $ch = curl_init($authUrl);
+        $authPayload = [
+            'email' => $email,
+            'password' => $password,
+            'email_confirm' => true,
+        ];
+        if ($phone !== '') {
+            $authPayload['user_metadata'] = ['phone' => $phone];
+        }
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => json_encode([
-                'email' => $email,
-                'password' => $password,
-                'email_confirm' => true,
-            ]),
+            CURLOPT_POSTFIELDS => json_encode($authPayload),
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'apikey: ' . SUPABASE_ANON_KEY,
@@ -100,7 +115,8 @@ class UserController
         $data = json_decode($response, true);
 
         if ($httpCode < 200 || $httpCode >= 300 || !is_array($data)) {
-            $msg = is_array($data) ? ($data['msg'] ?? $data['error_description'] ?? 'Failed to create user') : 'Failed to create user';
+            $baseMsg = is_array($data) ? ($data['msg'] ?? $data['error_description'] ?? $data['error'] ?? 'Failed to create user') : 'Failed to create user';
+            $msg = 'User create failed (HTTP ' . ($httpCode ?: 0) . '): ' . $baseMsg;
             $_SESSION['form_error'] = $msg;
             header('Location: ' . base_url('?page=users/create'));
             exit;
@@ -119,6 +135,7 @@ class UserController
             'name' => $name !== '' ? $name : $email,
             'role' => $role,
             'is_active' => true,
+            'branch_id' => $branchId,
         ]);
 
         if ($code >= 200 && $code < 300) {
@@ -148,6 +165,9 @@ class UserController
             exit;
         }
 
+        [$_, $branchRows] = $sb->get('branches', '?is_active=eq.true&select=id,name&order=name.asc');
+        $branches = is_array($branchRows) ? $branchRows : [];
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             self::update($id);
             return;
@@ -171,6 +191,7 @@ class UserController
         $name = trim($_POST['name'] ?? '');
         $role = trim($_POST['role'] ?? 'user');
         $isActive = isset($_POST['is_active']) && $_POST['is_active'] === '1';
+        $branchId = trim($_POST['branch_id'] ?? '');
 
         if (!in_array($role, self::ROLES, true)) {
             $role = 'user';
@@ -181,6 +202,7 @@ class UserController
             'name' => $name,
             'role' => $role,
             'is_active' => $isActive,
+            'branch_id' => $branchId !== '' ? $branchId : null,
         ]);
 
         if ($code >= 200 && $code < 300) {

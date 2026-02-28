@@ -25,7 +25,7 @@ class AuthController
 
         if ($email === '' || $password === '') {
             $setError('Email and password are required.');
-            header('Location: ' . BASE_URL);
+            header('Location: ' . base_url());
             exit;
         }
 
@@ -33,7 +33,7 @@ class AuthController
 
         if (isset($auth['error'])) {
             $setError(self::authErrorMessage($auth));
-            header('Location: ' . BASE_URL);
+            header('Location: ' . base_url());
             exit;
         }
 
@@ -42,7 +42,7 @@ class AuthController
 
         if (!$accessToken || !$authUserId) {
             $setError('Invalid response from authentication service.');
-            header('Location: ' . BASE_URL);
+            header('Location: ' . base_url());
             exit;
         }
 
@@ -50,20 +50,20 @@ class AuthController
 
         if ($profile === null) {
             $setError('Your account is not set up in the system or you do not have access. Please contact an administrator.');
-            header('Location: ' . BASE_URL);
+            header('Location: ' . base_url());
             exit;
         }
 
         if (isset($profile['is_active']) && $profile['is_active'] === false) {
             $setError('Your account has been deactivated. Please contact an administrator.');
-            header('Location: ' . BASE_URL);
+            header('Location: ' . base_url());
             exit;
         }
 
         self::setSessionUser($accessToken, $profile);
         Session::remove('login_error');
         unset($_SESSION['_flash']['login_error']);
-        header('Location: ' . BASE_URL);
+        header('Location: ' . base_url());
         exit;
     }
 
@@ -73,7 +73,7 @@ class AuthController
     public static function logout(): void
     {
         Session::destroy();
-        header('Location: ' . BASE_URL);
+        header('Location: ' . base_url());
         exit;
     }
 
@@ -164,6 +164,8 @@ class AuthController
         Session::set('user_id', $profile['id'] ?? null);
         Session::set('user_name', $profile['name'] ?? '');
         Session::set('user_role', $profile['role'] ?? 'user');
+        Session::set('user_branch_id', $profile['branch_id'] ?? null);
+        Session::set('last_activity', time());
     }
 
     private static function authErrorMessage(array $auth): string

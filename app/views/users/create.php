@@ -1,6 +1,7 @@
 <?php
 $title = $title ?? 'Add User';
 $roles = $roles ?? [];
+$branches = $branches ?? [];
 $error = $error ?? $_SESSION['form_error'] ?? '';
 if ($error && isset($_SESSION['form_error'])) {
     unset($_SESSION['form_error']);
@@ -29,6 +30,23 @@ if ($error && isset($_SESSION['form_error'])) {
       <div class="mb-3">
         <label class="form-label">Name</label>
         <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($_POST['name'] ?? '') ?>" placeholder="Display name">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Phone number</label>
+        <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Branch <span class="text-danger">*</span></label>
+        <select name="branch_id" class="form-select" required>
+          <option value="">Select branch</option>
+          <?php foreach ($branches as $b): ?>
+            <option value="<?= htmlspecialchars($b['id'] ?? '') ?>" <?= ($_POST['branch_id'] ?? '') === ($b['id'] ?? '') ? 'selected' : '' ?>>
+              <?= htmlspecialchars($b['name'] ?? '') ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
       </div>
 
       <div class="mb-3">

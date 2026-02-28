@@ -16,6 +16,12 @@
             <p>Dashboard</p>
           </a>
         </li>
+        <li class="nav-item">
+          <a href="<?= base_url('?page=profile') ?>" class="nav-link <?= $page === 'profile' ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-user"></i>
+            <p>My Profile</p>
+          </a>
+        </li>
 
         <?php if (Auth::isAdmin()): ?>
         <li class="nav-header text-uppercase">Admin</li>
@@ -23,6 +29,18 @@
           <a href="<?= base_url('?page=users') ?>" class="nav-link <?= strpos($page, 'users') === 0 ? 'active' : '' ?>">
             <i class="nav-icon fas fa-user-cog"></i>
             <p>Users</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= base_url('?page=branches') ?>" class="nav-link <?= strpos($page, 'branches') === 0 ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-code-branch"></i>
+            <p>Branches</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= base_url('?page=daily_targets') ?>" class="nav-link <?= $page === 'daily_targets' ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-bullseye"></i>
+            <p>Daily Targets</p>
           </a>
         </li>
         <?php endif; ?>
@@ -52,6 +70,12 @@
           <a href="<?= base_url('?page=calling_script') ?>" class="nav-link <?= $page === 'calling_script' ? 'active' : '' ?>">
             <i class="nav-icon fas fa-file-alt"></i>
             <p>Calling Script</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= base_url('?page=daily_progress') ?>" class="nav-link <?= $page === 'daily_progress' ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-list-check"></i>
+            <p>Daily Progress</p>
           </a>
         </li>
 

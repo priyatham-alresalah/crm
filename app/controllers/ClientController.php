@@ -77,7 +77,9 @@ class ClientController
         $clientStatus = trim($_POST['client_status'] ?? '');
         $data = [
             'client_name' => trim($_POST['client_name'] ?? ''),
-            'address' => trim($_POST['address'] ?? ''),
+            'address' => trim($_POST['address'] ?? '') ?: null,
+            'email' => trim($_POST['email'] ?? '') ?: null,
+            'phone' => trim($_POST['phone'] ?? '') ?: null,
         ];
         if ($clientStatus !== '' && in_array($clientStatus, self::CLIENT_STATUSES, true)) {
             $data['client_status'] = $clientStatus;
@@ -85,6 +87,10 @@ class ClientController
         if ($userId !== null) {
             $data['created_by'] = $userId;
             $data['assigned_to'] = $userId;
+        }
+        $branchId = Auth::branchId();
+        if ($branchId !== null && $branchId !== '') {
+            $data['branch_id'] = $branchId;
         }
 
         [$code, $result] = $sb->post('clients', $data, true);

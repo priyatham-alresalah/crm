@@ -25,6 +25,14 @@ if ($error) {
         <label class="form-label">Address</label>
         <input type="text" name="address" class="form-control" value="<?= htmlspecialchars($_POST['address'] ?? '') ?>">
       </div>
+      <div class="mb-3">
+        <label class="form-label">Client Email</label>
+        <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" placeholder="Optional company email">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Client Phone</label>
+        <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>" placeholder="Optional company phone">
+      </div>
 
       <div class="mb-3">
         <label class="form-label">Status</label>

@@ -2,11 +2,15 @@
 
 /**
  * Base URL for links (no trailing slash).
- * Uses BASE_URL from env; works on XAMPP and cPanel.
+ * Uses BASE_URL from env; works on XAMPP, cPanel subdomain, and subfolder.
+ * For subdomain (doc root = public/), set BASE_URL=/ or leave empty.
  */
 function base_url(string $path = ''): string
 {
     $base = defined('BASE_URL') ? rtrim(BASE_URL, '/') : '/crm/public';
+    if ($base === '') {
+        $base = '/';
+    }
     $path = ltrim($path, '/');
     return $path ? $base . '/' . $path : $base;
 }

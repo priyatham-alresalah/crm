@@ -26,9 +26,31 @@ class Auth
         return Session::get('user_role');
     }
 
+    public static function branchId(): ?string
+    {
+        return Session::get('user_branch_id');
+    }
+
     public static function check(): bool
     {
-        return self::id() !== null && self::jwt() !== null;
+        $id = self::id();
+        $jwt = self::jwt();
+        if ($id === null || $jwt === null) {
+            return false;
+        }
+
+        // Auto-logout after 15 minutes of inactivity
+        $now = time();
+        $last = Session::get('last_activity', $now);
+        $timeoutSeconds = 15 * 60;
+        if ($last + $timeoutSeconds < $now) {
+            Session::destroy();
+            return false;
+        }
+
+        // Update last activity timestamp
+        Session::set('last_activity', $now);
+        return true;
     }
 
     public static function isAdmin(): bool
@@ -71,7 +93,7 @@ class Auth
     public static function requireLogin(): void
     {
         if (!self::check()) {
-            header('Location: ' . BASE_URL);
+            header('Location: ' . base_url());
             exit;
         }
     }

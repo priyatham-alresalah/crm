@@ -35,8 +35,11 @@ $uri = $uri ?: '/';
 |--------------------------------------------------------------------------
 | AUTH ROUTES
 |--------------------------------------------------------------------------
+| Only treat POST as login when it's coming from the login page (no ?page=...).
+| This prevents other forms that also have email + password fields (e.g. Add User)
+| from being mis-routed as login attempts.
 */
-if ($method === 'POST' && isset($_POST['email'], $_POST['password'])) {
+if ($method === 'POST' && !isset($_GET['page']) && isset($_POST['email'], $_POST['password'])) {
     AuthController::login();
     exit;
 }
@@ -50,9 +53,15 @@ if ($uri === '/logout' || (isset($_GET['action']) && ($_GET['action'] ?? '') ===
 |--------------------------------------------------------------------------
 | GUEST ROUTES – require login
 |--------------------------------------------------------------------------
+| If the session is missing or has auto-logged out, show the login page
+| when hitting the base URL, and redirect there for any other page.
 */
 if (!Auth::check()) {
-    require __DIR__ . '/login.php';
+    if (!isset($_GET['page'])) {
+        require __DIR__ . '/login.php';
+        exit;
+    }
+    header('Location: ' . base_url());
     exit;
 }
 
@@ -143,6 +152,45 @@ switch ($page) {
     case 'users/delete':
         require __DIR__ . '/../app/controllers/UserController.php';
         UserController::delete();
+        break;
+
+    case 'branches':
+        require __DIR__ . '/../app/controllers/BranchController.php';
+        BranchController::index();
+        break;
+
+    case 'branches/create':
+        require __DIR__ . '/../app/controllers/BranchController.php';
+        BranchController::create();
+        break;
+
+    case 'branches/edit':
+        require __DIR__ . '/../app/controllers/BranchController.php';
+        BranchController::edit();
+        break;
+
+    case 'daily_targets':
+        require __DIR__ . '/../app/controllers/DailyTargetController.php';
+        DailyTargetController::edit();
+        break;
+
+    case 'daily_progress':
+        require __DIR__ . '/../app/controllers/DailyProgressController.php';
+        DailyProgressController::index();
+        break;
+
+    case 'daily_progress/create':
+        require __DIR__ . '/../app/controllers/DailyProgressController.php';
+        DailyProgressController::create();
+        break;
+
+    case 'profile':
+        require __DIR__ . '/../app/controllers/ProfileController.php';
+        if ($method === 'POST') {
+            ProfileController::update();
+        } else {
+            ProfileController::index();
+        }
         break;
 
     default:

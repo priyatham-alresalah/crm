@@ -2,6 +2,7 @@
 $user = $user ?? null;
 $title = $title ?? 'Edit User';
 $roles = $roles ?? [];
+$branches = $branches ?? [];
 $error = $error ?? $_SESSION['form_error'] ?? '';
 if ($error && isset($_SESSION['form_error'])) {
     unset($_SESSION['form_error']);
@@ -27,6 +28,19 @@ if ($error && isset($_SESSION['form_error'])) {
         <select name="role" class="form-select">
           <?php foreach ($roles as $r): ?>
             <option value="<?= htmlspecialchars($r) ?>" <?= ($user['role'] ?? $_POST['role'] ?? 'user') === $r ? 'selected' : '' ?>><?= htmlspecialchars(ucfirst($r)) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Branch</label>
+        <select name="branch_id" class="form-select">
+          <option value="">Select branch</option>
+          <?php $currentBranch = $_POST['branch_id'] ?? ($user['branch_id'] ?? ''); ?>
+          <?php foreach ($branches as $b): ?>
+            <option value="<?= htmlspecialchars($b['id'] ?? '') ?>" <?= $currentBranch === ($b['id'] ?? '') ? 'selected' : '' ?>>
+              <?= htmlspecialchars($b['name'] ?? '') ?>
+            </option>
           <?php endforeach; ?>
         </select>
       </div>

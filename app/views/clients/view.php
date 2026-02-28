@@ -30,6 +30,14 @@ if ($flashError) { unset($_SESSION['form_error']); }
       <dd class="col-sm-10"><?= htmlspecialchars(date('Y-m-d', strtotime($client['created_at'] ?? 'now'))) ?></dd>
       <dt class="col-sm-2">Address</dt>
       <dd class="col-sm-10"><?= htmlspecialchars($client['address'] ?? '—') ?></dd>
+      <?php if (!empty($client['email'])): ?>
+      <dt class="col-sm-2">Client email</dt>
+      <dd class="col-sm-10"><?= htmlspecialchars($client['email']) ?></dd>
+      <?php endif; ?>
+      <?php if (!empty($client['phone'])): ?>
+      <dt class="col-sm-2">Client phone</dt>
+      <dd class="col-sm-10"><?= htmlspecialchars($client['phone']) ?></dd>
+      <?php endif; ?>
       <?php if ($primaryContact): ?>
       <dt class="col-sm-2">Primary contact</dt>
       <dd class="col-sm-10"><?= htmlspecialchars($primaryContact['contact_name'] ?? '') ?><?= ($primaryContact['designation'] ?? '') !== '' ? ' (' . htmlspecialchars($primaryContact['designation']) . ')' : '' ?></dd>
@@ -47,7 +55,16 @@ if ($flashError) { unset($_SESSION['form_error']); }
 <div class="card mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h3 class="card-title mb-0">Client Contacts</h3>
-    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addContactModal">Add Contact</button>
+    <button
+      type="button"
+      class="btn btn-primary btn-sm"
+      data-bs-toggle="modal"
+      data-bs-target="#addContactModal"
+      data-toggle="modal"
+      data-target="#addContactModal"
+    >
+      Add Contact
+    </button>
   </div>
   <div class="card-body p-0">
     <?php if (empty($contacts)): ?>
@@ -97,7 +114,7 @@ if ($flashError) { unset($_SESSION['form_error']); }
         <input type="hidden" name="client_id" value="<?= htmlspecialchars($id) ?>">
         <div class="modal-header">
           <h5 class="modal-title" id="addContactModalLabel">Add Contact</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="mb-3">
@@ -122,7 +139,7 @@ if ($flashError) { unset($_SESSION['form_error']); }
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary">Save</button>
         </div>
       </form>
@@ -138,7 +155,7 @@ if ($flashError) { unset($_SESSION['form_error']); }
         <input type="hidden" name="id" id="edit_contact_id" value="">
         <div class="modal-header">
           <h5 class="modal-title" id="editContactModalLabel">Edit Contact</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="mb-3">
@@ -163,7 +180,7 @@ if ($flashError) { unset($_SESSION['form_error']); }
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary">Update</button>
         </div>
       </form>
@@ -173,6 +190,25 @@ if ($flashError) { unset($_SESSION['form_error']); }
 
 <script>
 (function() {
+  function showModal(el) {
+    if (!el) return;
+    if (window.bootstrap && bootstrap.Modal) {
+      var instance = bootstrap.Modal.getOrCreateInstance(el);
+      instance.show();
+    } else if (window.jQuery && jQuery.fn && typeof jQuery(el).modal === 'function') {
+      jQuery(el).modal('show');
+    }
+  }
+
+  var addModalEl = document.getElementById('addContactModal');
+  var addBtn = document.querySelector('[data-bs-target="#addContactModal"], [data-target="#addContactModal"]');
+  if (addBtn && addModalEl) {
+    addBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      showModal(addModalEl);
+    });
+  }
+
   var editModalEl = document.getElementById('editContactModal');
   document.querySelectorAll('.edit-contact').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -182,8 +218,21 @@ if ($flashError) { unset($_SESSION['form_error']); }
       document.getElementById('edit_contact_phone').value = this.dataset.phone || '';
       document.getElementById('edit_contact_designation').value = this.dataset.designation || '';
       document.getElementById('edit_is_primary').checked = this.dataset.primary === '1';
-      var modal = new bootstrap.Modal(editModalEl);
-      modal.show();
+      showModal(editModalEl);
+    });
+  });
+
+  // Fallback close handlers for Bootstrap 4 environments where data-bs-dismiss is ignored
+  document.querySelectorAll('[data-bs-dismiss="modal"]').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      var modalEl = this.closest('.modal');
+      if (!modalEl) return;
+      if (window.bootstrap && bootstrap.Modal) {
+        var inst = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
+        inst.hide();
+      } else if (window.jQuery && jQuery.fn && typeof jQuery(modalEl).modal === 'function') {
+        jQuery(modalEl).modal('hide');
+      }
     });
   });
 })();
@@ -197,22 +246,30 @@ if ($flashError) { unset($_SESSION['form_error']); }
     <?php if (empty($timeline)): ?>
       <p class="text-muted mb-0">No interactions yet. <a href="<?= base_url('?page=interactions/create&client_id=' . urlencode($id)) ?>">Log one</a>.</p>
     <?php else: ?>
-      <div class="timeline">
+      <div class="list-group">
         <?php foreach ($timeline as $i): ?>
-          <div class="time-label mb-2">
-            <span class="bg-info rounded px-2 py-1 text-white">
-              <?= htmlspecialchars(date('M j, Y', strtotime($i['interaction_date'] ?? $i['created_at'] ?? 'now'))) ?>
-            </span>
-          </div>
-          <div class="mb-3">
-            <span class="badge bg-<?= ($i['interaction_type'] ?? '') === 'call' ? 'success' : 'primary' ?>"><?= htmlspecialchars($i['interaction_type'] ?? '') ?></span>
-            <?php if (!empty($i['stage'])): ?>
-              <span class="badge bg-secondary"><?= htmlspecialchars($i['stage']) ?></span>
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="mb-0">
+                <span class="badge bg-<?= ($i['interaction_type'] ?? '') === 'call' ? 'success' : 'primary' ?>">
+                  <?= htmlspecialchars($i['interaction_type'] ?? '') ?>
+                </span>
+                <?php if (!empty($i['stage'])): ?>
+                  <span class="badge bg-secondary">
+                    <?= htmlspecialchars($i['stage']) ?>
+                  </span>
+                <?php endif; ?>
+                <?php if (!empty($i['subject'])): ?>
+                  <strong class="ms-1"><?= htmlspecialchars($i['subject']) ?></strong>
+                <?php endif; ?>
+              </div>
+              <small class="text-muted">
+                <?= htmlspecialchars(date('M j, Y', strtotime($i['interaction_date'] ?? $i['created_at'] ?? 'now'))) ?>
+              </small>
+            </div>
+            <?php if (!empty($i['notes'])): ?>
+              <p class="mb-0 mt-2 small"><?= nl2br(htmlspecialchars($i['notes'] ?? '')) ?></p>
             <?php endif; ?>
-            <?php if (!empty($i['subject'])): ?>
-              <strong><?= htmlspecialchars($i['subject']) ?></strong>
-            <?php endif; ?>
-            <p class="mb-0 mt-1"><?= nl2br(htmlspecialchars($i['notes'] ?? '')) ?></p>
           </div>
         <?php endforeach; ?>
       </div>

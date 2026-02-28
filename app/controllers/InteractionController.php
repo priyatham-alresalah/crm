@@ -75,6 +75,10 @@ class InteractionController
         if ($userId !== null) {
             $data['created_by'] = $userId;
         }
+        $branchId = Auth::branchId();
+        if ($branchId !== null && $branchId !== '') {
+            $data['branch_id'] = $branchId;
+        }
 
         [$code, $result] = $sb->post('interactions', $data);
 

@@ -195,3 +195,11 @@ html, body {
 .main-footer a {
   color: var(--crm-dark-text);
 }
+
+/* Hide three-dot icon buttons in header/navbar */
+.main-header .fa-ellipsis-h,
+.main-header .fa-ellipsis-v,
+.navbar .fa-ellipsis-h,
+.navbar .fa-ellipsis-v {
+  display: none !important;
+}
